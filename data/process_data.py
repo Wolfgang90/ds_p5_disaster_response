@@ -65,7 +65,7 @@ def clean_data(df):
     print("{} duplicates identified".format(num_duplicates))
           
     # drop duplicates
-    df = df[df.duplicated()]
+    df = df[~df.duplicated()]
     print("{} duplicates removed".format(num_duplicates))
     
     return df
