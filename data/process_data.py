@@ -24,7 +24,50 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    pass
+    """
+        Takes unpreprocessed dataframe and performs category expansion and duplicate drop
+        Input:
+            df (pd.DataFrame): Dataframe to be preprocessed
+        Output:
+            preprocessed dataframe
+    """
+    # create a dataframe of the 36 individual category columns
+    categories = df['categories'].str.split(pat=';', expand=True)
+    
+    # select the first row of the categories dataframe
+    row = categories.iloc[0,:]
+
+    # use this row to extract a list of new column names for categories.
+    category_colnames = row.apply(lambda x: x[:len(x)-2])
+    
+    # rename the columns of `categories`
+    categories.columns = category_colnames
+    
+    # Convert category values to just numbers 0 or 1.
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] = categories[column].astype(str).str[-1:]
+
+        # convert column from string to numeric
+        categories[column] = categories[column].astype(int)
+        
+    print("Expanded categories into 36 individual columns")
+        
+    # drop the original categories column from `df`
+    df = df.drop(labels='categories', axis=1)   
+    
+    # concatenate the original dataframe with the new `categories` dataframe
+    df = pd.concat([df, categories], axis=1)
+    
+    # check number of duplicates
+    num_duplicates = df.duplicated().sum()    
+    print("{} duplicates identified".format(num_duplicates))
+          
+    # drop duplicates
+    df = df[df.duplicated()]
+    print("{} duplicates removed".format(num_duplicates))
+    
+    return df
 
 
 def save_data(df, database_filename):
