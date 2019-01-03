@@ -13,6 +13,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
 
 def load_data(database_filepath):
@@ -76,7 +77,19 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    """
+        Prints f1 score, precision and recall for the test set for each category
+        Input:
+            model (sklearn classifier): trained model
+            X_test (pd.Series): X-values of test set
+            Y_test (pd.DataFrame): Y-values of test set
+            category_names (list): List with target category names
+    """
+    Y_pred = model.predict(X_test)
+    for i, col in enumerate(category_names):
+        classification_report(Y_test[col], Y_pred[:,i:i+1])
+        print("Accuracy score for \'{}\': {:.4f}".format(col, accuracy_score(Y_test.values[:,i], Y_pred[:,i])))
+        print("Classification report \'{}\':\n {}".format(col,classification_report(Y_test.values[:,i], Y_pred[:,i], target_names=["0","1"])))
 
 
 def save_model(model, model_filepath):
