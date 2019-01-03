@@ -1,8 +1,26 @@
 import sys
+import pandas as pd
+from sqlalchemy import create_engine
 
 
 def load_data(database_filepath):
-    pass
+    """
+        Loads dataframe from database
+        Input:
+            database_filepath: Filepath of the database to be loaded
+        Output:
+            X (pd.Series): Series of text messages
+            Y (pd.DataFrame): DataFrame with target categories
+            category_names (list): List with target category names
+        
+    """
+    engine = create_engine('sqlite:///{}'.format(database_filepath))
+    df = pd.read_sql_table('disaster', engine)
+    X = df['message']
+    Y = df.drop(['id','message','original', 'genre'],axis=1)
+    category_names = list(Y.columns)
+    
+    return X, Y, category_names
 
 
 def tokenize(text):
