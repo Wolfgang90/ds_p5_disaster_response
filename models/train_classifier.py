@@ -12,7 +12,6 @@ def load_data(database_filepath):
             X (pd.Series): Series of text messages
             Y (pd.DataFrame): DataFrame with target categories
             category_names (list): List with target category names
-        
     """
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table('disaster', engine)
@@ -24,7 +23,27 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
-    pass
+    """
+        Transforms text into cleaned tokens
+        Input:
+            text (str): Text to be tokenized
+        Output:
+            cleaned_tokens (list): List of cleaned tokens
+    """
+    #tokenize text
+    tokens = word_tokenize(text)
+    
+    # initiate lemmatizer
+    lemmatizer = WordNetLemmatizer()
+
+    # iterate through each token
+    clean_tokens = []
+    for tok in tokens:
+        
+        # lemmatize, normalize case, and remove leading/trailing white space
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip() 
+        clean_tokens.append(clean_tok)
+    return clean_tokens
 
 
 def build_model():
