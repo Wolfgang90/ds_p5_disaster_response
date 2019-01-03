@@ -2,6 +2,18 @@ import sys
 import pandas as pd
 from sqlalchemy import create_engine
 
+import nltk
+nltk.download(['punkt', 'wordnet'])
+
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+
 
 def load_data(database_filepath):
     """
@@ -47,7 +59,20 @@ def tokenize(text):
 
 
 def build_model():
-    pass
+    """
+        Builds pipeline-model
+        Output:
+            pipeline-model
+    """
+    pipeline = Pipeline([
+    ('text_pipeline', Pipeline([
+    ('vect', CountVectorizer(tokenizer=tokenize)),
+    ('tfidf', TfidfTransformer())
+    ])),
+    
+    ('clf', MultiOutputClassifier(RandomForestClassifier(max_depth=None, min_samples_leaf=1, min_samples_split=2)))
+    ])    
+    return pipeline
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
