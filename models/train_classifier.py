@@ -9,7 +9,7 @@ nltk.download(['punkt', 'wordnet'])
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.ensemble import RandomForestClassifier
@@ -62,7 +62,7 @@ def tokenize(text):
 
 def build_model():
     """
-        Builds pipeline-model
+        Builds pipeline-based gridsearch-object
         Output:
             pipeline-model
     """
@@ -74,7 +74,15 @@ def build_model():
     
     ('clf', MultiOutputClassifier(RandomForestClassifier(max_depth=None, min_samples_leaf=1, min_samples_split=2)))
     ])    
-    return pipeline
+    
+    parameters = {
+              'clf__estimator__max_depth': [2,5,None],
+              'clf__estimator__min_samples_split':[2,5],
+              'clf__estimator__min_samples_leaf': [1,5]            
+             }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters, n_jobs=-1)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -108,7 +116,8 @@ def main():
         model = build_model()
         
         print('Training model...')
-        model.fit(X_train, Y_train)
+        model.fit(X_train, Y_train)        
+        model = model.best_estimator_
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
